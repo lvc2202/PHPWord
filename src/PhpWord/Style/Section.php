@@ -10,12 +10,14 @@
  * file that was distributed with this source code. For the full list of
  * contributors, visit https://github.com/PHPOffice/PHPWord/contributors.
  *
- * @link        https://github.com/PHPOffice/PHPWord
- * @copyright   2010-2016 PHPWord contributors
+ * @see         https://github.com/PHPOffice/PHPWord
+ * @copyright   2010-2018 PHPWord contributors
  * @license     http://www.gnu.org/licenses/lgpl.txt LGPL version 3
  */
 
 namespace PhpOffice\PhpWord\Style;
+
+use PhpOffice\PhpWord\SimpleType\VerticalJc;
 
 /**
  * Section settings
@@ -48,7 +50,7 @@ class Section extends Border
      * Page Orientation
      *
      * @var string
-     * @link http://www.schemacentral.com/sc/ooxml/a-w_orient-1.html
+     * @see  http://www.schemacentral.com/sc/ooxml/a-w_orient-1.html
      */
     private $orientation = self::ORIENTATION_PORTRAIT;
 
@@ -105,7 +107,7 @@ class Section extends Border
      * Page gutter spacing
      *
      * @var int|float
-     * @link http://www.schemacentral.com/sc/ooxml/e-w_pgMar-1.html
+     * @see  http://www.schemacentral.com/sc/ooxml/e-w_pgMar-1.html
      */
     private $gutter = self::DEFAULT_GUTTER;
 
@@ -162,9 +164,17 @@ class Section extends Border
      * Line numbering
      *
      * @var \PhpOffice\PhpWord\Style\LineNumbering
-     * @link http://www.schemacentral.com/sc/ooxml/e-w_lnNumType-1.html
+     * @see  http://www.schemacentral.com/sc/ooxml/e-w_lnNumType-1.html
      */
     private $lineNumbering;
+
+    /**
+     * Vertical Text Alignment on Page
+     * One of \PhpOffice\PhpWord\SimpleType\VerticalJc
+     *
+     * @var string
+     */
+    private $vAlign;
 
     /**
      * Create new instance
@@ -504,6 +514,7 @@ class Section extends Border
     public function setPageNumberingStart($pageNumberingStart = null)
     {
         $this->pageNumberingStart = $pageNumberingStart;
+
         return $this;
     }
 
@@ -572,6 +583,7 @@ class Section extends Border
     public function setBreakType($value = null)
     {
         $this->breakType = $value;
+
         return $this;
     }
 
@@ -594,6 +606,30 @@ class Section extends Border
     public function setLineNumbering($value = null)
     {
         $this->setObjectVal($value, 'LineNumbering', $this->lineNumbering);
+
+        return $this;
+    }
+
+    /**
+     * Get vertical alignment
+     *
+     * @return string
+     */
+    public function getVAlign()
+    {
+        return $this->vAlign;
+    }
+
+    /**
+     * Set vertical alignment
+     *
+     * @param string $value
+     * @return self
+     */
+    public function setVAlign($value = null)
+    {
+        VerticalJc::validate($value);
+        $this->vAlign = $value;
 
         return $this;
     }

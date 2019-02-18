@@ -10,12 +10,14 @@
  * file that was distributed with this source code. For the full list of
  * contributors, visit https://github.com/PHPOffice/PHPWord/contributors.
  *
- * @link        https://github.com/PHPOffice/PHPWord
- * @copyright   2010-2016 PHPWord contributors
+ * @see         https://github.com/PHPOffice/PHPWord
+ * @copyright   2010-2018 PHPWord contributors
  * @license     http://www.gnu.org/licenses/lgpl.txt LGPL version 3
  */
 
 namespace PhpOffice\PhpWord\Style;
+
+use PhpOffice\PhpWord\SimpleType\VerticalJc;
 
 /**
  * Test class for PhpOffice\PhpWord\Style\Section
@@ -23,7 +25,7 @@ namespace PhpOffice\PhpWord\Style;
  * @coversDefaultClass \PhpOffice\PhpWord\Element\Section
  * @runTestsInSeparateProcesses
  */
-class SettingsTest extends \PHPUnit_Framework_TestCase
+class SectionTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Executed before each method of the class
@@ -327,5 +329,19 @@ class SettingsTest extends \PHPUnit_Framework_TestCase
 
         $oSettings->setBreakType();
         $this->assertNull($oSettings->getBreakType());
+    }
+
+    /**
+     * Vertical page alignment
+     */
+    public function testVerticalAlign()
+    {
+        // Section Settings
+        $oSettings = new Section();
+
+        $this->assertNull($oSettings->getVAlign());
+
+        $oSettings->setVAlign(VerticalJc::BOTH);
+        $this->assertEquals('both', $oSettings->getVAlign());
     }
 }

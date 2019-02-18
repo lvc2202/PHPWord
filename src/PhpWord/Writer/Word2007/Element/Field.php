@@ -10,8 +10,8 @@
  * file that was distributed with this source code. For the full list of
  * contributors, visit https://github.com/PHPOffice/PHPWord/contributors.
  *
- * @link        https://github.com/PHPOffice/PHPWord
- * @copyright   2010-2016 PHPWord contributors
+ * @see         https://github.com/PHPOffice/PHPWord
+ * @copyright   2010-2018 PHPWord contributors
  * @license     http://www.gnu.org/licenses/lgpl.txt LGPL version 3
  */
 
@@ -26,17 +26,25 @@ class Field extends Text
 {
     /**
      * Write field element.
-     *
-     * @return void
      */
     public function write()
     {
-        $xmlWriter = $this->getXmlWriter();
-        $element   = $this->getElement();
+        $element = $this->getElement();
         if (!$element instanceof \PhpOffice\PhpWord\Element\Field) {
             return;
         }
 
+        $methodName = 'write' . ucfirst(strtolower($element->getType()));
+        if (method_exists($this, $methodName)) {
+            $this->$methodName($element);
+        } else {
+            $this->writeDefault($element);
+        }
+    }
+
+    private function writeDefault(\PhpOffice\PhpWord\Element\Field $element)
+    {
+        $xmlWriter = $this->getXmlWriter();
         $this->startElementP();
 
         $xmlWriter->startElement('w:r');
@@ -65,7 +73,6 @@ class Field extends Text
 
         if ($element->getText() != null) {
             if ($element->getText() instanceof \PhpOffice\PhpWord\Element\TextRun) {
-
                 $containerWriter = new Container($xmlWriter, $element->getText(), true);
                 $containerWriter->write();
 
@@ -107,20 +114,71 @@ class Field extends Text
         $this->endElementP(); // w:p
     }
 
+    /**
+     * Writes a macrobutton field
+     *
+     * //TODO A lot of code duplication with general method, should maybe be refactored
+     * @param \PhpOffice\PhpWord\Element\Field $element
+     */
+    protected function writeMacrobutton(\PhpOffice\PhpWord\Element\Field $element)
+    {
+        $xmlWriter = $this->getXmlWriter();
+        $this->startElementP();
+
+        $xmlWriter->startElement('w:r');
+        $xmlWriter->startElement('w:fldChar');
+        $xmlWriter->writeAttribute('w:fldCharType', 'begin');
+        $xmlWriter->endElement(); // w:fldChar
+        $xmlWriter->endElement(); // w:r
+
+        $instruction = ' ' . $element->getType() . ' ' . $this->buildPropertiesAndOptions($element);
+        if (is_string($element->getText())) {
+            $instruction .= $element->getText() . ' ';
+        }
+
+        $xmlWriter->startElement('w:r');
+        $xmlWriter->startElement('w:instrText');
+        $xmlWriter->writeAttribute('xml:space', 'preserve');
+        $xmlWriter->text($instruction);
+        $xmlWriter->endElement(); // w:instrText
+        $xmlWriter->endElement(); // w:r
+
+        if ($element->getText() != null) {
+            if ($element->getText() instanceof \PhpOffice\PhpWord\Element\TextRun) {
+                $containerWriter = new Container($xmlWriter, $element->getText(), true);
+                $containerWriter->write();
+            }
+        }
+
+        $xmlWriter->startElement('w:r');
+        $xmlWriter->startElement('w:fldChar');
+        $xmlWriter->writeAttribute('w:fldCharType', 'end');
+        $xmlWriter->endElement(); // w:fldChar
+        $xmlWriter->endElement(); // w:r
+
+        $this->endElementP(); // w:p
+    }
+
     private function buildPropertiesAndOptions(\PhpOffice\PhpWord\Element\Field $element)
     {
         $propertiesAndOptions = '';
-        $properties  = $element->getProperties();
+        $properties = $element->getProperties();
         foreach ($properties as $propkey => $propval) {
             switch ($propkey) {
                 case 'format':
-                    $propertiesAndOptions.= '\* ' . $propval . ' ';
+                    $propertiesAndOptions .= '\* ' . $propval . ' ';
                     break;
                 case 'numformat':
-                    $propertiesAndOptions.= '\# ' . $propval . ' ';
+                    $propertiesAndOptions .= '\# ' . $propval . ' ';
                     break;
                 case 'dateformat':
-                    $propertiesAndOptions.= '\@ "' . $propval . '" ';
+                    $propertiesAndOptions .= '\@ "' . $propval . '" ';
+                    break;
+                case 'macroname':
+                    $propertiesAndOptions .= $propval . ' ';
+                    break;
+                default:
+                    $propertiesAndOptions .= '"' . $propval . '" ';
                     break;
             }
         }
@@ -129,27 +187,28 @@ class Field extends Text
         foreach ($options as $option) {
             switch ($option) {
                 case 'PreserveFormat':
-                    $propertiesAndOptions.= '\* MERGEFORMAT ';
+                    $propertiesAndOptions .= '\* MERGEFORMAT ';
                     break;
                 case 'LunarCalendar':
-                    $propertiesAndOptions.= '\h ';
+                    $propertiesAndOptions .= '\h ';
                     break;
                 case 'SakaEraCalendar':
-                    $propertiesAndOptions.= '\s ';
+                    $propertiesAndOptions .= '\s ';
                     break;
                 case 'LastUsedFormat':
-                    $propertiesAndOptions.= '\l ';
+                    $propertiesAndOptions .= '\l ';
                     break;
                 case 'Bold':
-                    $propertiesAndOptions.= '\b ';
+                    $propertiesAndOptions .= '\b ';
                     break;
                 case 'Italic':
-                    $propertiesAndOptions.= '\i ';
+                    $propertiesAndOptions .= '\i ';
                     break;
                 default:
-                    $propertiesAndOptions.= $option .' ';
+                    $propertiesAndOptions .= $option . ' ';
             }
         }
+
         return $propertiesAndOptions;
     }
 }

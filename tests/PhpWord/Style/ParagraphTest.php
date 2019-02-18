@@ -10,14 +10,15 @@
  * file that was distributed with this source code. For the full list of
  * contributors, visit https://github.com/PHPOffice/PHPWord/contributors.
  *
- * @link        https://github.com/PHPOffice/PHPWord
- * @copyright   2010-2016 PHPWord contributors
+ * @see         https://github.com/PHPOffice/PHPWord
+ * @copyright   2010-2018 PHPWord contributors
  * @license     http://www.gnu.org/licenses/lgpl.txt LGPL version 3
  */
 
 namespace PhpOffice\PhpWord\Style;
 
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\SimpleType\LineSpacingRule;
 use PhpOffice\PhpWord\TestHelperDOCX;
 
 /**
@@ -25,7 +26,7 @@ use PhpOffice\PhpWord\TestHelperDOCX;
  *
  * @runTestsInSeparateProcesses
  */
-class ParagraphTest extends \PHPUnit_Framework_TestCase
+class ParagraphTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Tear down after each test
@@ -66,28 +67,30 @@ class ParagraphTest extends \PHPUnit_Framework_TestCase
         $object = new Paragraph();
 
         $attributes = array(
-            'spaceAfter'        => 240,
-            'spaceBefore'       => 240,
-            'indent'            => 1,
-            'hanging'           => 1,
-            'spacing'           => 120,
-            'basedOn'           => 'Normal',
-            'next'              => 'Normal',
-            'numStyle'          => 'numStyle',
-            'numLevel'          => 1,
-            'widowControl'      => false,
-            'keepNext'          => true,
-            'keepLines'         => true,
-            'pageBreakBefore'   => true,
-            'contextualSpacing' => true,
+            'spaceAfter'          => 240,
+            'spaceBefore'         => 240,
+            'indent'              => 1,
+            'hanging'             => 1,
+            'spacing'             => 120,
+            'spacingLineRule'     => LineSpacingRule::AT_LEAST,
+            'basedOn'             => 'Normal',
+            'next'                => 'Normal',
+            'numStyle'            => 'numStyle',
+            'numLevel'            => 1,
+            'widowControl'        => false,
+            'keepNext'            => true,
+            'keepLines'           => true,
+            'pageBreakBefore'     => true,
+            'contextualSpacing'   => true,
+            'textAlignment'       => 'auto',
+            'bidi'                => true,
+            'suppressAutoHyphens' => true,
         );
         foreach ($attributes as $key => $value) {
             $get = $this->findGetter($key, $value, $object);
             $object->setStyleValue("$key", $value);
             if ('indent' == $key || 'hanging' == $key) {
                 $value = $value * 720;
-            } elseif ('spacing' == $key) {
-                $value += 240;
             }
             $this->assertEquals($value, $object->$get());
         }
@@ -98,10 +101,11 @@ class ParagraphTest extends \PHPUnit_Framework_TestCase
         if (is_bool($value)) {
             if (method_exists($object, "is{$key}")) {
                 return "is{$key}";
-            } else if (method_exists($object, "has{$key}")) {
+            } elseif (method_exists($object, "has{$key}")) {
                 return "has{$key}";
             }
         }
+
         return "get{$key}";
     }
 
@@ -112,7 +116,7 @@ class ParagraphTest extends \PHPUnit_Framework_TestCase
     {
         $object = new Paragraph();
 
-        $attributes = array('spacing', 'indent', 'hanging', 'spaceBefore', 'spaceAfter');
+        $attributes = array('spacing', 'indent', 'hanging', 'spaceBefore', 'spaceAfter', 'textAlignment');
         foreach ($attributes as $key) {
             $get = $this->findGetter($key, null, $object);
             $this->assertNull($object->$get());
